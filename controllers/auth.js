@@ -1,6 +1,10 @@
 const asyncHandler = require('../middleware/async');
 const User = require('../models/User');
+const ErrorResponse = require('../utils/errorResponse');
 
+// @desc    Register new user
+// @route   POST /api/v1/auth/register
+// @access  Public
 exports.register = asyncHandler(async (req, res, next) => {
   const { name, email, password, role } = req.body;
 
@@ -11,7 +15,69 @@ exports.register = asyncHandler(async (req, res, next) => {
     role
   });
 
-  res.status(201).json({
-    success: true
+  sendCookieResponse(user, 200, res);
+});
+
+// @desc    Log in user
+// @route   POST /api/v1/auth/login
+// @access  Public
+exports.login = asyncHandler(async (req, res, next) => {
+  const { email, password } = req.body;
+
+  if (!email || !password) {
+    return next(
+      new ErrorResponse('Please provide an email and password.', 400)
+    );
+  }
+
+  const user = await User.findOne({ email }).select('+password');
+
+  if (!user) {
+    return next(new ErrorResponse('Bad credentials.', 401));
+  }
+
+  const matchPassword = await user.matchPassword(password);
+
+  if (!matchPassword) {
+    return next(new ErrorResponse('Bad credentials.', 401));
+  }
+
+  const token = user.getGeneratedJwt();
+
+  sendCookieResponse(user, 200, res);
+});
+
+const sendCookieResponse = (user, statusCode, res) => {
+  const token = user.getGeneratedJwt();
+
+  const options = {
+    expires: new Date(
+      Date.now() + process.env.JWT_COOKIE_EXPIRE * 24 * 60 * 60 * 1000
+    ),
+    httpOnly: true
+  };
+
+  if (process.env.NODE_ENV === 'production') {
+    options.secure = true;
+  }
+
+  res
+    .status(statusCode)
+    .cookie('token', token, options)
+    .json({
+      success: true,
+      token
+    });
+};
+
+// @desc    Get user account info
+// @route   POST /api/v1/auth/me
+// @access  Private
+exports.getMe = asyncHandler(async (req, res, next) => {
+  const user = await User.findById(req.user.id);
+
+  res.status(200).json({
+    success: true,
+    data: user
   });
 });

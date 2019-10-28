@@ -4,6 +4,7 @@ const dotenv = require('dotenv');
 const morgan = require('morgan');
 const colors = require('colors');
 const fileUpload = require('express-fileupload');
+const cookieParser = require('cookie-parser');
 
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
@@ -28,6 +29,9 @@ app.use(express.json());
 
 // Static folder set up
 app.use(express.static(path.join(__dirname, '/public')));
+
+// Cookie parser
+app.use(cookieParser());
 
 // Development logging
 if (process.env.NODE_ENV === 'development') {
