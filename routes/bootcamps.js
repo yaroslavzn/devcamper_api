@@ -15,10 +15,12 @@ const Bootcamp = require('../models/Bootcamp');
 
 // Include resource routers
 const coursesRouter = require('./courses');
+const reviewsRouter = require('./reviews');
 
 const { protect, authorize } = require('../middleware/auth');
 
 router.use('/:bootcampId/courses', coursesRouter);
+router.use('/:bootcampId/reviews', reviewsRouter);
 
 router.route('/radius/:zipcode/:distance').get(getBootcampsInRadius);
 
