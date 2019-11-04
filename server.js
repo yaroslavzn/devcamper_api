@@ -5,12 +5,20 @@ const morgan = require('morgan');
 const colors = require('colors');
 const fileUpload = require('express-fileupload');
 const cookieParser = require('cookie-parser');
+const mongoSanitize = require('express-mongo-sanitize');
+const helmet = require('helmet');
+const xss = require('xss-clean');
+const rateLimit = require('express-rate-limit');
+const hpp = require('hpp');
+const cors = require('cors');
 
 const connectDB = require('./config/db');
 const errorHandler = require('./middleware/error');
 
-// Load env vars
-dotenv.config({ path: './config/config.env' });
+if (process.env.NODE_ENV !== 'production') {
+  // Load env vars
+  dotenv.config({ path: './config/config.env' });
+}
 
 const PORT = process.env.PORT || 5000;
 
@@ -42,6 +50,29 @@ if (process.env.NODE_ENV === 'development') {
 
 // File upload middleware
 app.use(fileUpload());
+
+// Mongo sanitize
+app.use(mongoSanitize());
+
+// Security headers
+app.use(helmet());
+
+// XSS clean
+app.use(xss());
+
+// Rate limit
+const limiter = rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 100
+});
+
+// HPP Security
+app.use(hpp());
+
+// CORS
+app.use(cors());
+
+app.use(limiter);
 
 app.use('/api/v1/bootcamps', bootcamps);
 app.use('/api/v1/courses', courses);
