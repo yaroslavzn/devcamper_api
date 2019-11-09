@@ -50,6 +50,7 @@ UserSchema.pre('save', async function(next) {
 // Get generated JWT token
 UserSchema.methods.getGeneratedJwt = function() {
   return jwt.sign(
+    // payload
     {
       id: this._id,
       role: this.role,
