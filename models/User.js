@@ -54,8 +54,7 @@ UserSchema.methods.getGeneratedJwt = function() {
     {
       id: this._id,
       role: this.role,
-      name: this.name,
-      expiresIn: parseInt(process.env.JWT_EXPIRE)
+      name: this.name
     },
     process.env.JWT_SECRET,
     {
