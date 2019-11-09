@@ -49,9 +49,18 @@ UserSchema.pre('save', async function(next) {
 
 // Get generated JWT token
 UserSchema.methods.getGeneratedJwt = function() {
-  return jwt.sign({ id: this._id }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRE
-  });
+  return jwt.sign(
+    {
+      id: this._id,
+      role: this.role,
+      name: this.name,
+      expiresIn: process.env.JWT_SECRET
+    },
+    process.env.JWT_SECRET,
+    {
+      expiresIn: process.env.JWT_EXPIRE
+    }
+  );
 };
 
 // Match password
