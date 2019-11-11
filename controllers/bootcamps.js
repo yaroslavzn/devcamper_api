@@ -29,6 +29,29 @@ exports.getBootcamp = asyncHandler(async (req, res, next) => {
   });
 });
 
+// @desc    Get single bootcamp by slug
+// @route   GET /api/v1/bootcamps/:slug
+// @access  Public
+exports.getBootcampBySlug = asyncHandler(async (req, res, next) => {
+  const bootcamp = await Bootcamp.findOne({
+    slug: req.params.slug
+  }).populate('courses');
+
+  if (!bootcamp) {
+    return next(
+      new ErrorResponse(
+        `Bootcamp not found with slug of ${req.params.slug}`,
+        404
+      )
+    );
+  }
+
+  res.status(200).json({
+    success: true,
+    data: bootcamp
+  });
+});
+
 // @desc    Create new bootcamp
 // @route   POST /api/v1/bootcamps
 // @access  Private

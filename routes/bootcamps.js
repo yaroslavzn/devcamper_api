@@ -7,7 +7,8 @@ const {
   updateBootcamp,
   deleteBootcamp,
   getBootcampsInRadius,
-  uploadBootcampPhoto
+  uploadBootcampPhoto,
+  getBootcampBySlug
 } = require('../controllers/bootcamps');
 
 const advancedResults = require('../middleware/advancedResults');
@@ -31,9 +32,11 @@ router
 
 router
   .route('/:id')
-  .get(getBootcamp)
+  // .get(getBootcamp)
   .put(protect, authorize('publisher', 'admin'), updateBootcamp)
   .delete(protect, authorize('publisher', 'admin'), deleteBootcamp);
+
+router.route('/:slug').get(getBootcampBySlug);
 
 router
   .route('/:id/photo')
